@@ -26,21 +26,16 @@ def count_plot(data, column,hue='Attrition'):
 
 # fonction pour visualiser les données numériques avec matrice de correlation 
 def correlation(df):
-    df = df.copy()
-    df['Attrition'] = df['Attrition'].map({'No': 0, 'Yes': 1})
-    corr = df.corr()
+    data = df.copy()
+    data['Attrition'] = data['Attrition'].map({'No': 0, 'Yes': 1})
+    corr = data.corr()
     plt.figure(figsize=(20,10))
     sns.heatmap(corr,annot=True,cmap="Purples",fmt=".2f")
     plt.show()
 
 # #preparer le data, diviser notre ensemble de données en features and target 
-# def prepare_data(data, target, colonnes_a_droper=[]):
-#     X = data.drop(colonnes_a_droper,axis=1)
-#     y = data[target]
-#     return X, y
-
-def prepare_data(data):
-    # dropper les colonnes inutiles 
+def prepare_data(df):
+    data = df.copy()
     columns_to_drop = [
         'Attrition',
         'EmployeeCount',
@@ -57,14 +52,13 @@ def prepare_data(data):
         'DailyRate'
     ]
     # Séparer X et y
-    X = data.drop(columns_to_drop, errors='ignore')
+    X = data.drop(columns=columns_to_drop, axis=1)
     y = data['Attrition']
 
     #garder les colonnes numériques en supprimons les colonnes déja encodés
     num_features = X.select_dtypes(exclude='object').columns.drop(
         ['Education','EnvironmentSatisfaction','JobInvolvement',
-        'JobSatisfaction','PerformanceRating','RelationshipSatisfaction','WorkLifeBalance'], 
-        errors='ignore'
+        'JobSatisfaction','PerformanceRating','RelationshipSatisfaction','WorkLifeBalance']
     )
     #garder les colonnes catégorielles
     cat_features = X.select_dtypes(include='object').columns
