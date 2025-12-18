@@ -1,9 +1,14 @@
 import joblib
 
+# Charger le modèle
 model = joblib.load("ML/lr_model.pkl")
-pipeline = joblib.load("ML/pipeline.pkl")
+
 
 def predict_churn(data):
-    X = pipeline.transform([data])
-    proba = model.predict_proba(X)[0][1]
+    """
+    data : liste ou array des features déjà préparées
+    """
+    # Si model est un pipeline, il gère la transformation automatiquement
+    # Si model est juste le modèle, data doit être déjà transformé
+    proba = model.predict_proba([data])[0][1]
     return float(proba)
