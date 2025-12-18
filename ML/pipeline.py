@@ -9,6 +9,8 @@ from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, classification_report, roc_curve, roc_auc_score
+import matplotlib.pyplot as plt
 
 # fonction pour charger les données 
 def load_data(data):
@@ -36,6 +38,7 @@ def correlation(df):
 # #preparer le data, diviser notre ensemble de données en features and target 
 def prepare_data(df):
     data = df.copy()
+    data['Attrition'] = data['Attrition'].map({'No': 0, 'Yes': 1})
     columns_to_drop = [
         'Attrition',
         'EmployeeCount',
@@ -74,21 +77,22 @@ def prepare_data(df):
 
 
 def train_model_with_grid(X_train, y_train, X_num, X_cat, X_cat_encoded, model_type='rf'):
-    """
-    Entraîne un modèle de classification (RF ou Logistic Regression) avec pipeline complet et GridSearchCV
-    """
+
     # Prétraitement
     preprocessor = ColumnTransformer(
         transformers=[
             ('num', StandardScaler(), X_num),
-            ('cat_txt', OneHotEncoder(handle_unknown='ignore'), X_cat),
+            ('cat', OneHotEncoder(handle_unknown='ignore'), X_cat),
             ('cat_encod', 'passthrough', X_cat_encoded)
         ]
     )
 
-    # Choix du modèle et grille de paramètres
+    # Choix du modèle
     if model_type == 'rf':
-        model = RandomForestClassifier(random_state=42)
+        model = RandomForestClassifier(
+            random_state=42,
+            class_weight='balanced'  
+        )
         param_grid = {
             'feature_selection__k': [5, 8, 10],
             'classifier__n_estimators': [100, 200],
@@ -96,33 +100,71 @@ def train_model_with_grid(X_train, y_train, X_num, X_cat, X_cat_encoded, model_t
             'classifier__min_samples_split': [2, 5],
             'classifier__min_samples_leaf': [1, 2]
         }
+
     elif model_type == 'lr':
-        model = LogisticRegression(max_iter=1000, random_state=42)
+        model = LogisticRegression(
+            max_iter=1000,
+            random_state=42,
+            class_weight='balanced'  
+        )
         param_grid = {
             'feature_selection__k': [5, 8, 10],
             'classifier__C': [0.1, 1, 10],
             'classifier__solver': ['lbfgs', 'liblinear']
         }
-    else:
-        raise ValueError("model_type doit être 'rf' ou 'logreg'")
 
-    # Pipeline complet
+    else:
+        raise ValueError("model_type doit être 'rf' ou 'lr'")
+
+    # Pipeline
     pipeline = Pipeline(steps=[
         ('preprocessor', preprocessor),
         ('feature_selection', SelectKBest(score_func=f_classif)),
         ('classifier', model)
     ])
 
-    # GridSearchCV
+    # GridSearch
     grid_search = GridSearchCV(
         estimator=pipeline,
         param_grid=param_grid,
         cv=5,
-        scoring='roc_auc',  # On optimise le ROC-AUC pour classification
+        scoring='roc_auc', 
         n_jobs=-1
     )
 
-    # Entraînement
     grid_search.fit(X_train, y_train)
 
     return grid_search
+
+
+def evaluate_model(grid, X_test, y_test):
+
+    # Prédictions
+    y_pred = grid.predict(X_test)
+    y_proba = grid.predict_proba(X_test)[:, 1]  # Probabilité de la classe positive
+
+    # Matrice de confusion
+    cm = confusion_matrix(y_test, y_pred)
+    disp = ConfusionMatrixDisplay(cm, display_labels=grid.classes_)
+    disp.plot(cmap=plt.cm.Blues)
+    plt.title("Matrice de confusion")
+    plt.show()
+
+    # Rapport de classification
+    print("=== Rapport de classification ===")
+    print(classification_report(y_test, y_pred))
+
+    # Courbe ROC
+    fpr, tpr, thresholds = roc_curve(y_test, y_proba)
+    auc_score = roc_auc_score(y_test, y_proba)
+
+    plt.figure()
+    plt.plot(fpr, tpr, label=f'ROC curve (AUC = {auc_score:.2f})')
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Courbe ROC')
+    plt.legend(loc='lower right')
+    plt.show()
+
+    return y_pred, y_proba
