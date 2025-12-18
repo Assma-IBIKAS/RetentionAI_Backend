@@ -1,7 +1,9 @@
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
+from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv()
+dotenv_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path)
 import os
 
 USER_DB = os.getenv('USER_DB')
@@ -24,3 +26,5 @@ def getdb():
       yield db
     finally:
       db.close()
+
+# print("DB CONFIG:", USER_DB, PASSWORD, HOST, PORT, DATABASE)
