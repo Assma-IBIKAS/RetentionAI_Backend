@@ -8,5 +8,4 @@ class PredictionsHistory(Base):
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     user_id = Column(Integer, ForeignKey("users.id"))
-    employee_id = Column(Integer)
     probability = Column(Float)
