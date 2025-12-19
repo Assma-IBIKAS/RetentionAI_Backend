@@ -16,12 +16,21 @@ from backend.schemas.employee_schema import employee_schema
 from backend.services.ml_service import predict_churn
 from backend.services.dependencies import get_current_user
 from backend.services.gemini_service import generate_retention_plan
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 
 app = FastAPI(title="RetentionAI Backend")
 
 # Création des tables
 Base.metadata.create_all(bind=engine)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = ["*"],
+    allow_credentials = True,
+    allow_methods = ["*"],
+    allow_headers = ["*"]
+)
 
 @app.get("/")
 def root():
