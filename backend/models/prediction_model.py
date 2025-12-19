@@ -2,6 +2,7 @@ from backend.database.db import Base
 from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey
 from datetime import datetime
 
+
 class PredictionsHistory(Base):
     __tablename__ = "predictions_history"
 
