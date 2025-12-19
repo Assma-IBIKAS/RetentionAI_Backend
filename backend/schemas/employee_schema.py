@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import Literal
 
-
 class employee_schema(BaseModel):
     Age: int
     BusinessTravel: Literal[
@@ -65,3 +64,9 @@ class employee_schema(BaseModel):
     YearsAtCompany: int
     YearsInCurrentRole: int
     YearsWithCurrManager: int
+
+
+# from pydantic import BaseModel
+
+class GeneratePlanRequest(BaseModel):
+    prediction_id: int
