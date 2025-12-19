@@ -7,7 +7,7 @@ joblib
 fastapi[standard]
 python-jose
 passlib[bcrypt]
-sqlalchemy
+sqlalchemy-orm
 psycopg2-binary
 python-dotenv
 pytest
