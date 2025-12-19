@@ -11,47 +11,30 @@ GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=GENAI_API_KEY)
 
 
-def generate_retention_plan(employee, churn_probability: float) -> list:
+def generate_retention_plan(churn_probability: float) -> list:
     """
     Génère un plan de rétention RH personnalisé
-    à partir des données employé et de la probabilité de churn
+    uniquement basé sur la probabilité de churn.
     """
-
-    # Sécurité : convertir en dict si Pydantic
-    if hasattr(employee, "dict"):
-        employee = employee.dict()
 
     # Règle métier : pas de plan si risque faible
     if churn_probability < 0.5:
         return []
 
     try:
+        # Prompt simple basé uniquement sur la probabilité
         prompt = f"""
-Tu es un expert senior en Ressources Humaines et en rétention des talents.
+Tu es un expert senior en Ressources Humaines.
 
-Voici les informations sur l’employé :
-
-- Âge : {employee.get("Age")}
-- Département : {employee.get("Department")}
-- Poste : {employee.get("JobRole")}
-- Niveau hiérarchique : {employee.get("JobLevel")}
-- Satisfaction au travail : {employee.get("JobSatisfaction")}/4
-- Implication : {employee.get("JobInvolvement")}/4
-- Performance : {employee.get("PerformanceRating")}/4
-- Équilibre vie professionnelle / personnelle : {employee.get("WorkLifeBalance")}/4
-- Heures supplémentaires : {employee.get("OverTime")}
-
-Contexte :
-Le modèle de Machine Learning a estimé une probabilité de départ volontaire
-de {round(churn_probability * 100, 2)}%.
+Le modèle de Machine Learning a estimé une probabilité
+de départ volontaire de {round(churn_probability * 100, 2)}%.
 
 Tâche :
-Propose exactement 3 actions concrètes, réalistes et personnalisées
-pour réduire le risque de départ de cet employé.
+Propose exactement 3 actions concrètes, réalistes
+et adaptées pour réduire le risque de départ.
 
 Contraintes :
 - Actions applicables par un manager RH
-- Adaptées au poste et au niveau de satisfaction
 - Liste claire et opérationnelle
 """
 
@@ -74,3 +57,4 @@ Contraintes :
     except Exception as e:
         print("Erreur Gemini :", e)
         return []
+
