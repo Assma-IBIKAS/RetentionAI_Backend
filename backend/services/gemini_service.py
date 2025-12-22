@@ -5,10 +5,10 @@ import os
 
 load_dotenv()
 
-GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Création du client Gemini
-client = genai.Client(api_key=GENAI_API_KEY)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 def generate_retention_plan(churn_probability: float) -> list:
