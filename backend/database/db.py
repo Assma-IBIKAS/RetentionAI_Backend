@@ -18,7 +18,9 @@ PORT = os.getenv('PORT')
 DATABASE = os.getenv('DATABASE')
 
 # Créer l'URL de connexion
-DATABASE_URL = f"postgresql://{USER_DB}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+# DATABASE_URL = f"postgresql://{USER_DB}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+# DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:0000@localhost:5432/retention")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Créer l'engine SQLAlchemy
 engine = create_engine(DATABASE_URL)
